@@ -25,9 +25,9 @@ class Client {
   }
 
   capturePaymentIntent({ paymentIntentId }) {
-    const formData = new URLSearchParams();
-    formData.append("payment_intent_id", paymentIntentId);
-    return this.doPost(this.url + "/capture_payment_intent", formData);
+    console.log(
+      "PUT to /stripe_payment_intent/{intent_Id} with capture: true to capture the payment"
+    );
   }
 
   savePaymentMethodToCustomer({ paymentMethodId }) {

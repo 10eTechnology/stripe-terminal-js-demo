@@ -27,6 +27,13 @@ class App extends Component {
       registrationCode: "",
       cancelablePayment: false
     };
+
+    console.log(
+      `
+      Set the connection token on: window.connectionToken
+      And the payment intent secret on: window.pendingPaymentIntentSecret
+      `
+    );
   }
 
   // 1. Stripe Terminal Initialization
@@ -38,8 +45,7 @@ class App extends Component {
     this.terminal = window.StripeTerminal.create({
       // 1c. Create a callback that retrieves a new ConnectionToken from the example backend
       onFetchConnectionToken: async () => {
-        let connectionTokenResult = await this.client.createConnectionToken();
-        return connectionTokenResult.secret;
+        return window.connectionToken;
       },
       // 1c. (Optional) Create a callback that will be called if the reader unexpectedly disconnects.
       // You can use this callback to alert your user that the reader is no longer connected and will need to be reconnected.
@@ -64,6 +70,13 @@ class App extends Component {
         }
       )
     });
+
+    window.terminal = this.terminal;
+    window.client = this.client;
+
+    console.log(
+      "The terminal and client stripe objects have been set on window.terminal and window.client"
+    );
     Logger.watchObject(this.client, "backend", {
       createConnectionToken: {
         docsUrl: "https://stripe.com/docs/terminal/sdk/js#connection-token"
@@ -208,18 +221,19 @@ class App extends Component {
   collectCardPayment = async () => {
     // We want to reuse the same PaymentIntent object in the case of declined charges, so we
     // store the pending PaymentIntent's secret until the payment is complete.
+    this.pendingPaymentIntentSecret = window.pendingPaymentIntentSecret;
     if (!this.pendingPaymentIntentSecret) {
-      try {
-        let createIntentResponse = await this.client.createPaymentIntent({
-          amount: App.CHARGE_AMOUNT,
-          currency: "usd",
-          description: "Test Charge"
-        });
-        this.pendingPaymentIntentSecret = createIntentResponse.secret;
-      } catch (e) {
-        // Suppress backend errors since they will be shown in logs
-        return;
-      }
+      // try {
+      //   let createIntentResponse = await this.client.createPaymentIntent({
+      //     amount: App.CHARGE_AMOUNT,
+      //     currency: "usd",
+      //     description: "Test Charge"
+      //   });
+      //   this.pendingPaymentIntentSecret = createIntentResponse.secret;
+      // } catch (e) {
+      //   // Suppress backend errors since they will be shown in logs
+      //   return;
+      // }
     }
     // Read a card from the customer
     const paymentMethodPromise = this.terminal.collectPaymentMethod(

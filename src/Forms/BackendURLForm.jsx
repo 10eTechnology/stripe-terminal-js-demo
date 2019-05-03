@@ -12,7 +12,7 @@ class BackendURLForm extends React.Component {
     super(props);
 
     this.state = {
-      backendURL: null
+      backendURL: "http://rival-stripe-terminal-dev.herokuapp.com"
     };
   }
 
